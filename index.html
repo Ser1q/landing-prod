@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MynAI — Automate the work. Scale the results.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Syne:wght@700;800&family=Unbounded:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg: #F4F4F2;
+      --surface: #FFFFFF;
+      --surface-2: #EEEEED;
+      --teal: #3FBFA6;
+      --teal-light: #6FE3C1;
+      --teal-dark: #1F8F7A;
+      --teal-deep: #1C6E63;
+      --teal-muted: #A7DCD2;
+      --text: #1A1A1A;
+      --text-2: #6B7280;
+      --border: #E5E7EB;
+      --border-teal: rgba(63, 191, 166, 0.3);
+      --grad-teal: linear-gradient(135deg, #6FE3C1 0%, #3FBFA6 50%, #1F8F7A 100%);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Onest', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Subtle dot texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(63, 191, 166, 0.12) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ambient glows */
+    .glow-tr {
+      position: fixed;
+      top: -240px;
+      right: -160px;
+      width: 780px;
+      height: 780px;
+      background: radial-gradient(circle, rgba(111, 227, 193, 0.18) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-bl {
+      position: fixed;
+      bottom: -280px;
+      left: -180px;
+      width: 640px;
+      height: 640px;
+      background: radial-gradient(circle, rgba(167, 220, 210, 0.14) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Noise overlay */
+    .noise-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    }
+
+    /* Typography */
+    .font-display {
+      font-family: 'Unbounded', sans-serif;
+    }
+
+    /* Label pill */
+    .label {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Onest', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--teal-dark);
+      border: 1px solid var(--border-teal);
+      background: rgba(63, 191, 166, 0.08);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--grad-teal);
+      color: #FFFFFF;
+      font-family: 'Onest', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(31, 143, 122, 0.25);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(31, 143, 122, 0.32);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Onest', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 14px 24px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--teal-muted);
+      box-shadow: 0 4px 16px rgba(63, 191, 166, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(244, 244, 242, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+      height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 0.18s;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .nav-link:focus-visible {
+      outline: 2px solid var(--teal);
+      border-radius: 2px;
+    }
+
+    /* Sections */
+    .section {
+      position: relative;
+      z-index: 2;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-mid {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Service icon box */
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, rgba(111, 227, 193, 0.2) 0%, rgba(63, 191, 166, 0.12) 100%);
+      border: 1px solid var(--border-teal);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Teal accent line */
+    .teal-bar {
+      width: 28px;
+      height: 2px;
+      background: var(--grad-teal);
+      border-radius: 2px;
+    }
+
+    /* Divider */
+    .sep {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Step circle */
+    .step-num {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border-teal);
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(111, 227, 193, 0.15) 0%, rgba(63, 191, 166, 0.08) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--teal-dark);
+    }
+
+    /* Metric display */
+    .metric-val {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 800;
+      font-size: 52px;
+      line-height: 1;
+      background: var(--grad-teal);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.025em;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scanLine {
+      0% {
+        transform: translateY(-100%);
+      }
+
+      100% {
+        transform: translateY(100vh);
+      }
+    }
+
+    .h-a1 {
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+
+    .h-a2 {
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+    }
+
+    .h-a3 {
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
+    }
+
+    .h-a4 {
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
+    }
+
+    .h-a5 {
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.66s both;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-d1 {
+      transition-delay: 0.05s;
+    }
+
+    .reveal-d2 {
+      transition-delay: 0.12s;
+    }
+
+    .reveal-d3 {
+      transition-delay: 0.19s;
+    }
+
+    .reveal-d4 {
+      transition-delay: 0.26s;
+    }
+
+    /* Input */
+    .email-input {
+      flex: 1;
+      min-width: 0;
+      background: var(--surface);
+      border: none;
+      outline: none;
+      padding: 16px 20px;
+      font-family: 'Onest', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .email-input::placeholder {
+      color: var(--text-2);
+    }
+
+    .lead-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 0 auto 18px;
+      max-width: 740px;
+    }
+
+    .input-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border-teal);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(63, 191, 166, 0.08);
+    }
+
+    .status-text {
+      min-height: 20px;
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .status-text.ok {
+      color: var(--teal-deep);
+    }
+
+    .status-text.error {
+      color: #B54747;
+    }
+
+    /* Success notification overlay */
+    .success-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: var(--surface);
+      border: 2px solid var(--teal);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 480px;
+      text-align: center;
+      z-index: 1000;
+      box-shadow: 0 20px 60px rgba(31, 143, 122, 0.35);
+      animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      backdrop-filter: blur(10px);
+    }
+
+    .success-toast.hidden {
+      animation: toastOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      pointer-events: none;
+    }
+
+    .success-toast-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, rgba(111, 227, 193, 0.2) 0%, rgba(63, 191, 166, 0.12) 100%);
+      border: 2px solid var(--teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: iconBounce 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    }
+
+    .success-toast-icon svg {
+      stroke: var(--teal);
+      stroke-width: 2;
+    }
+
+    .success-toast-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .success-toast-subtext {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      animation: overlayIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .success-overlay.hidden {
+      animation: overlayOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+    }
+
+    @keyframes overlayIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes overlayOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes iconBounce {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Quote accent */
+    .quote-accent {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 64px;
+      line-height: 0.7;
+      color: rgba(63, 191, 166, 0.2);
+    }
+
+    /* Horizontal rule with teal center */
+    .h-rule {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .h-rule::before,
+    .h-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--teal-muted);
+      border-radius: 3px;
+    }
+
+    /* Service card hover */
+    .service-card {
+      background: var(--surface);
+      padding: 44px;
+      transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .service-card:hover {
+      background: #FAFFFE;
+      box-shadow: inset 0 0 0 1px var(--border-teal);
+    }
+
+    .service-card .teal-bar {
+      width: 28px;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .service-card:hover .teal-bar {
+      width: 48px;
+    }
+
+    /* Nav active link */
+    .nav-link.active {
+      color: var(--text);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      display: block;
+      height: 1.5px;
+      background: var(--grad-teal);
+      margin-top: 2px;
+      border-radius: 2px;
+    }
+
+    /* Mobile nav toggle */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 1.5px;
+      background: var(--text);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .nav-toggle.open span:nth-child(1) {
+      transform: translateY(6.5px) rotate(45deg);
+    }
+
+    .nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .nav-toggle.open span:nth-child(3) {
+      transform: translateY(-6.5px) rotate(-45deg);
+    }
+
+    /* Mobile nav drawer */
+    .nav-mobile {
+      display: none;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: rgba(244, 244, 242, 0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px 32px;
+      flex-direction: column;
+      gap: 0;
+      z-index: 99;
+    }
+
+    .nav-mobile.open {
+      display: flex;
+    }
+
+    .nav-mobile a {
+      font-size: 16px;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.18s;
+    }
+
+    .nav-mobile a:hover {
+      color: var(--text);
+    }
+
+    .nav-mobile a:last-child {
+      border-bottom: none;
+    }
+
+    .nav-mobile .cta-mobile {
+      margin-top: 20px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+
+      .nav-links,
+      nav>.nav-inner>a.btn-primary {
+        display: none;
+      }
+
+      .nav-toggle {
+        display: flex;
+      }
+
+      /* Hero */
+      .hero-metrics {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 28px !important;
+      }
+
+      /* Sections padding */
+      .section-pad {
+        padding: 72px 24px !important;
+      }
+
+      /* Services split header */
+      .services-header {
+        grid-template-columns: 1fr !important;
+      }
+
+      .services-header>div:last-child {
+        display: none;
+      }
+
+      /* Services 2x2 → 1col */
+      .services-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .services-grid>div {
+        border-left: none !important;
+        border-top: 1px solid var(--border) !important;
+        border-bottom: none !important;
+      }
+
+      .services-grid>div:first-child {
+        border-top: none !important;
+      }
+
+      /* Results header split */
+      .results-header {
+        grid-template-columns: 1fr !important;
+      }
+
+      .results-header>div:last-child {
+        display: none;
+      }
+
+      /* Results metrics 3→1col */
+      .results-metrics {
+        grid-template-columns: 1fr !important;
+      }
+
+      .results-metrics>div {
+        border-left: none !important;
+        border-top: 1px solid var(--border) !important;
+      }
+
+      .results-metrics>div:first-child {
+        border-top: none !important;
+      }
+
+      /* Process 3→1col */
+      .process-steps {
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+      }
+
+      .process-steps>div {
+        padding: 0 !important;
+      }
+
+      .process-connector {
+        display: none !important;
+      }
+
+      /* Hero headline */
+      .hero-pad {
+        padding: 120px 24px 64px !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      /* Hero metrics 2→1col on very small */
+      .hero-metrics {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      /* Nav inner padding */
+      .nav-inner {
+        padding: 0 20px !important;
+      }
+
+      /* CTA form stack */
+      .cta-form {
+        flex-direction: column !important;
+        border-radius: 4px !important;
+      }
+
+      .cta-form input {
+        border-radius: 4px 4px 0 0 !important;
+      }
+
+      .cta-form button {
+        border-radius: 0 0 4px 4px !important;
+        width: 100% !important;
+        justify-content: center !important;
+      }
+
+      .container {
+        padding: 0 20px !important;
+      }
+
+      .lead-form-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Ambient elements -->
+  <div class="glow-tr"></div>
+  <div class="glow-bl"></div>
+  <div class="noise-layer"></div>
+
+  <!-- ═══════════════════════ NAV ═══════════════════════ -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" style="display:flex;align-items:center;text-decoration:none;flex-shrink:0;">
+        <img src="assets/logos/myn_ai_logo_trans_fit.png" alt="MynAI" style="height: 45px;width:auto;">
+      </a>
+      <div class="nav-links">
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#process" class="nav-link">Process</a>
+        <a href="#results" class="nav-link">Results</a>
+      </div>
+      <a href="#contact" class="btn-primary" style="font-size:13px;padding:10px 20px;">
+        <span data-i18n="nav.bookCall">Book a Call</span> <span style="font-size:16px;line-height:1;">→</span>
+      </a>
+      <button id="langToggle" class="nav-link"
+        style="background:none;border:none;cursor:pointer;font-size:13px;padding:0;font-weight:500;">
+        RU
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav drawer -->
+  <div class="nav-mobile" id="navMobile">
+    <a href="#services">Services</a>
+    <a href="#process">Process</a>
+    <a href="#results">Results</a>
+    <a href="#contact" class="btn-primary cta-mobile" style="margin-top:20px;justify-content:center;">Book a Call →</a>
+  </div>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section class="section hero-pad"
+    style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px 0 80px;overflow:hidden;">
+    <div class="container" style="position:relative;z-index:2;">
+
+      <!-- Label -->
+      <div class="h-a1" style="margin-bottom:28px;">
+        <span class="label" data-i18n="hero.label">AI Automation Agency · Sales & Consulting</span>
+      </div>
+
+      <!-- Headline -->
+      <div class="h-a2" style="margin-bottom:28px;">
+        <h1 class="font-display"
+          style="font-weight:800;font-size:clamp(54px,7.5vw,96px);line-height:0.97;letter-spacing:-0.035em;color:var(--text);max-width:780px;">
+          <span data-i18n="hero.heading1">Automate the work.</span><br>
+          <span
+            style="background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"
+            data-i18n="hero.heading2">Scale
+            the results.</span>
+        </h1>
+      </div>
+
+      <!-- Sub -->
+      <div class="h-a3" style="margin-bottom:44px;">
+        <p style="font-size:17px;line-height:1.75;color:var(--text-2);max-width:520px;font-weight:400;"
+          data-i18n="hero.subheading">
+          We build AI systems for sales and consulting teams — wire them into your existing stack and hand them over
+          running. No fluff, no roadmaps. Just systems that work.
+        </p>
+      </div>
+
+      <!-- CTAs -->
+      <div class="h-a4" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:88px;">
+        <a href="#contact" class="btn-primary"><span data-i18n="hero.cta1">Book a Strategy Call</span> <span
+            style="font-size:16px;">→</span></a>
+        <a href="#services" class="btn-ghost" data-i18n="hero.cta2">See what we automate</a>
+      </div>
+
+      <!-- Metric strip -->
+      <div class="h-a5">
+        <div class="sep" style="margin-bottom:36px;"></div>
+        <div class="hero-metrics" style="display:grid;grid-template-columns:repeat(4,1fr);gap:40px;">
+
+          <div>
+            <div
+              style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:42px;line-height:1;background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;"
+              data-i18n="hero.metric1.val">
+              12 hrs</div>
+            <div
+              style="font-size:12px;color:var(--text-2);margin-top:8px;line-height:1.6;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;"
+              data-i18n="hero.metric1.label">
+              saved per rep / week</div>
+          </div>
+
+          <div>
+            <div
+              style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:42px;line-height:1;background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;"
+              data-i18n="hero.metric2.val">
+              4 hrs</div>
+            <div
+              style="font-size:12px;color:var(--text-2);margin-top:8px;line-height:1.6;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;"
+              data-i18n="hero.metric2.label">
+              proposal turnaround <span style="color:var(--text-2);opacity:0.5;">/ was 3 days</span></div>
+          </div>
+
+          <div>
+            <div
+              style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:42px;line-height:1;background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;"
+              data-i18n="hero.metric3.val">
+              40+</div>
+            <div
+              style="font-size:12px;color:var(--text-2);margin-top:8px;line-height:1.6;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;"
+              data-i18n="hero.metric3.label">
+              systems wired & running</div>
+          </div>
+
+          <div>
+            <div
+              style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:42px;line-height:1;background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;"
+              data-i18n="hero.metric4.val">
+              3×</div>
+            <div
+              style="font-size:12px;color:var(--text-2);margin-top:8px;line-height:1.6;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;"
+              data-i18n="hero.metric4.label">
+              pipeline output, same team</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Hero right decoration: vertical teal line -->
+    <div
+      style="position:absolute;right:0;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,rgba(63,191,166,0.25) 30%,rgba(63,191,166,0.25) 70%,transparent);pointer-events:none;">
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ SERVICES ═══════════════════════ -->
+  <section id="services" class="section section-pad" style="padding:108px 40px;border-top:1px solid var(--border);">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="reveal services-header"
+        style="margin-bottom:64px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;">
+        <div>
+          <div
+            style="font-family:'Onest',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:18px;"
+            data-i18n="services.label">
+            What We Build</div>
+          <h2 class="font-display"
+            style="font-weight:800;font-size:clamp(30px,3.8vw,46px);letter-spacing:-0.025em;line-height:1.1;color:var(--text);"
+            data-i18n="services.heading">
+            AI wired into how<br>your team already works.
+          </h2>
+        </div>
+        <div>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-2);" data-i18n="services.desc">
+            We don't sell tools. We build operating systems for your revenue team — connected to the CRM, inbox, and
+            documents your people use every day.
+          </p>
+        </div>
+      </div>
+
+      <!-- 2x2 Grid -->
+      <div class="services-grid"
+        style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+        <!-- Card 1 -->
+        <div class="reveal reveal-d1 service-card">
+          <div class="icon-box" style="margin-bottom:28px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F8F7A" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <h3 class="font-display" style="font-weight:700;font-size:18px;margin-bottom:12px;color:var(--text);"
+            data-i18n="services.1.title">Sales
+            Pipeline Automation</h3>
+          <p style="font-size:14px;line-height:1.72;color:var(--text-2);" data-i18n="services.1.desc">Automate lead
+            qualification, follow-up
+            sequences, and CRM updates. Your reps focus on closing — not admin. We've eliminated 40+ manual follow-ups
+            per rep per day.</p>
+          <div class="teal-bar" style="margin-top:28px;"></div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="reveal reveal-d2 service-card" style="border-left:1px solid var(--border);">
+          <div class="icon-box" style="margin-bottom:28px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F8F7A" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </div>
+          <h3 class="font-display" style="font-weight:700;font-size:18px;margin-bottom:12px;color:var(--text);"
+            data-i18n="services.2.title">AI
+            Proposal Generation</h3>
+          <p style="font-size:14px;line-height:1.72;color:var(--text-2);" data-i18n="services.2.desc">Custom proposals
+            in 4 hours, not 3 days. Pull
+            client data, apply your templates, deliver on-brand outputs automatically. Every time, without exception.
+          </p>
+          <div class="teal-bar" style="margin-top:28px;"></div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="reveal reveal-d3 service-card" style="border-top:1px solid var(--border);">
+          <div class="icon-box" style="margin-bottom:28px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F8F7A" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <h3 class="font-display" style="font-weight:700;font-size:18px;margin-bottom:12px;color:var(--text);"
+            data-i18n="services.3.title">Stack
+            Integration</h3>
+          <p style="font-size:14px;line-height:1.72;color:var(--text-2);" data-i18n="services.3.desc">Connect your CRM,
+            inbox, Slack, and reporting
+            into one automated system. No rip-and-replace — we wire into what you already use. Zero platform switching.
+          </p>
+          <div class="teal-bar" style="margin-top:28px;"></div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="reveal reveal-d4 service-card"
+          style="border-top:1px solid var(--border);border-left:1px solid var(--border);">
+          <div class="icon-box" style="margin-bottom:28px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F8F7A" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            </svg>
+          </div>
+          <h3 class="font-display" style="font-weight:700;font-size:18px;margin-bottom:12px;color:var(--text);"
+            data-i18n="services.4.title">
+            Consulting Ops Automation</h3>
+          <p style="font-size:14px;line-height:1.72;color:var(--text-2);" data-i18n="services.4.desc">Automate client
+            onboarding, status reporting,
+            and delivery workflows. Deliver more engagements without adding headcount. Same team, 3× the throughput.</p>
+          <div class="teal-bar" style="margin-top:28px;"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ PROCESS ═══════════════════════ -->
+  <section id="process" class="section section-pad" style="padding:108px 40px;border-top:1px solid var(--border);">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="reveal" style="margin-bottom:72px;">
+        <div
+          style="font-family:'Onest',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:18px;"
+          data-i18n="process.label">
+          How It Works</div>
+        <h2 class="font-display"
+          style="font-weight:800;font-size:clamp(30px,3.8vw,46px);letter-spacing:-0.025em;line-height:1.1;color:var(--text);"
+          data-i18n="process.heading">
+          Manual to measurable.<br>In three steps.
+        </h2>
+      </div>
+
+      <!-- Steps -->
+      <div class="process-steps" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;position:relative;">
+
+        <!-- Connector lines between steps -->
+        <div class="process-connector"
+          style="position:absolute;top:26px;left:52px;right:calc(66.67% - 48px);height:1px;background:rgba(63,191,166,0.4);z-index:0;pointer-events:none;">
+        </div>
+        <div class="process-connector"
+          style="position:absolute;top:26px;left:calc(33.33% + 100px);right:calc(33.33% - 48px);height:1px;background:rgba(63,191,166,0.4);z-index:0;pointer-events:none;">
+        </div>
+
+        <!-- Step 1 -->
+        <div class="reveal reveal-d1" style="padding:0 48px 0 0;position:relative;z-index:1;">
+          <div class="step-num" style="margin-bottom:28px;">01</div>
+          <h3 class="font-display" style="font-weight:700;font-size:19px;margin-bottom:14px;color:var(--text);"
+            data-i18n="process.1.title">Audit &
+            Map</h3>
+          <p style="font-size:14px;line-height:1.75;color:var(--text-2);" data-i18n="process.1.desc">We map your full
+            pipeline and find every
+            manual bottleneck. You get a clear ROI case with exact time savings before we write a single line of code.
+          </p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:10px;">
+            <div style="width:4px;height:4px;background:var(--teal);border-radius:50%;"></div>
+            <span style="font-size:12px;color:var(--text-2);" data-i18n="process.1.meta">Delivered within 48
+              hours</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="reveal reveal-d2" style="padding:0 48px;position:relative;z-index:1;">
+          <div class="step-num" style="margin-bottom:28px;">02</div>
+          <h3 class="font-display" style="font-weight:700;font-size:19px;margin-bottom:14px;color:var(--text);"
+            data-i18n="process.2.title">Build &
+            Wire</h3>
+          <p style="font-size:14px;line-height:1.75;color:var(--text-2);" data-i18n="process.2.desc">We build every
+            automation inside your existing
+            tools. No migration. No new platforms to learn. Your team keeps working exactly how they do — minus the
+            manual parts.</p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:10px;">
+            <div style="width:4px;height:4px;background:var(--teal);border-radius:50%;"></div>
+            <span style="font-size:12px;color:var(--text-2);" data-i18n="process.2.meta">2–3 week build sprint</span>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="reveal reveal-d3" style="padding:0 0 0 48px;position:relative;z-index:1;">
+          <div class="step-num" style="margin-bottom:28px;">03</div>
+          <h3 class="font-display" style="font-weight:700;font-size:19px;margin-bottom:14px;color:var(--text);"
+            data-i18n="process.3.title">Hand
+            Over Running</h3>
+          <p style="font-size:14px;line-height:1.75;color:var(--text-2);" data-i18n="process.3.desc">Full ownership —
+            trained, documented, live.
+            You're not dependent on us to keep it running. We stay on for 30 days to measure results and tune
+            performance.</p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:10px;">
+            <div style="width:4px;height:4px;background:var(--teal);border-radius:50%;"></div>
+            <span style="font-size:12px;color:var(--text-2);" data-i18n="process.3.meta">30-day performance
+              window</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ RESULTS ═══════════════════════ -->
+  <section id="results" class="section section-pad"
+    style="padding:108px 40px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="reveal results-header"
+        style="margin-bottom:64px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;">
+        <div>
+          <div
+            style="font-family:'Onest',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:18px;"
+            data-i18n="results.label">
+            Results</div>
+          <h2 class="font-display"
+            style="font-weight:800;font-size:clamp(30px,3.8vw,46px);letter-spacing:-0.025em;line-height:1.1;color:var(--text);"
+            data-i18n="results.heading">
+            Numbers,<br>not promises.
+          </h2>
+        </div>
+        <div>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-2);" data-i18n="results.desc">
+            Our clients are ROI-driven. We measure every engagement. These aren't projections — they're averages from
+            active deployments.
+          </p>
+        </div>
+      </div>
+
+      <!-- Metrics row -->
+      <div class="results-metrics"
+        style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:32px;box-shadow:0 4px 24px rgba(0,0,0,0.05);">
+
+        <div class="reveal reveal-d1" style="background:var(--surface);padding:44px;">
+          <div class="metric-val" data-i18n="results.1.metric">3d → 4h</div>
+          <div class="font-display" style="font-weight:700;font-size:16px;margin:14px 0 10px;color:var(--text);"
+            data-i18n="results.1.title">
+            Proposal Turnaround</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.65;" data-i18n="results.1.desc">Cut from 3 days to
+            4 hours. Same quality, same
+            brand standards. Every time — not just occasionally.</p>
+          <div class="sep" style="margin-top:28px;"></div>
+          <div
+            style="margin-top:16px;font-size:11px;color:var(--teal-dark);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;"
+            data-i18n="results.1.footer">
+            87% time reduction</div>
+        </div>
+
+        <div class="reveal reveal-d2"
+          style="background:var(--surface);padding:44px;border-left:1px solid var(--border);">
+          <div class="metric-val" data-i18n="results.2.metric">12 hrs</div>
+          <div class="font-display" style="font-weight:700;font-size:16px;margin:14px 0 10px;color:var(--text);"
+            data-i18n="results.2.title">Saved
+            Per Rep / Week</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.65;" data-i18n="results.2.desc">Back in the
+            pipeline, not in spreadsheets.
+            Same headcount closing more deals — no new hires required.</p>
+          <div class="sep" style="margin-top:28px;"></div>
+          <div
+            style="margin-top:16px;font-size:11px;color:var(--teal-dark);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;"
+            data-i18n="results.2.footer">
+            30% of a working week</div>
+        </div>
+
+        <div class="reveal reveal-d3"
+          style="background:var(--surface);padding:44px;border-left:1px solid var(--border);">
+          <div class="metric-val" data-i18n="results.3.metric">3×</div>
+          <div class="font-display" style="font-weight:700;font-size:16px;margin:14px 0 10px;color:var(--text);"
+            data-i18n="results.3.title">
+            Pipeline Output</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.65;" data-i18n="results.3.desc">Three times the
+            leads processed without adding
+            a single hire. Scale without burn — compounding results over time.</p>
+          <div class="sep" style="margin-top:28px;"></div>
+          <div
+            style="margin-top:16px;font-size:11px;color:var(--teal-dark);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;"
+            data-i18n="results.3.footer">
+            Same headcount</div>
+        </div>
+
+      </div>
+
+      <!-- Testimonials -->
+      <div class="reveal" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+
+        <div
+          style="padding:36px;border:1px solid var(--border-teal);border-radius:16px;background:linear-gradient(135deg,rgba(111,227,193,0.07) 0%,rgba(63,191,166,0.04) 100%);position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(63,191,166,0.1);">
+          <div
+            style="position:absolute;top:-12px;left:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:72px;line-height:1;color:rgba(63,191,166,0.15);pointer-events:none;">
+            "</div>
+          <p class="font-display"
+            style="font-weight:700;font-size:18px;line-height:1.65;color:var(--text);position:relative;z-index:1;"
+            data-i18n="testimonial.1.quote">
+          </p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:14px;position:relative;z-index:1;">
+            <div
+              style="width:38px;height:38px;background:var(--surface-2);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5"
+                stroke-linecap="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="testimonial.1.role"></div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px;" data-i18n="testimonial.1.company"></div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="padding:36px;border:1px solid var(--border-teal);border-radius:16px;background:linear-gradient(135deg,rgba(111,227,193,0.07) 0%,rgba(63,191,166,0.04) 100%);position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(63,191,166,0.1);">
+          <div
+            style="position:absolute;top:-12px;left:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:72px;line-height:1;color:rgba(63,191,166,0.15);pointer-events:none;">
+            "</div>
+          <p class="font-display"
+            style="font-weight:700;font-size:18px;line-height:1.65;color:var(--text);position:relative;z-index:1;"
+            data-i18n="testimonial.2.quote">
+          </p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:14px;position:relative;z-index:1;">
+            <div
+              style="width:38px;height:38px;background:var(--surface-2);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5"
+                stroke-linecap="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="testimonial.2.role"></div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px;" data-i18n="testimonial.2.company"></div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="padding:36px;border:1px solid var(--border-teal);border-radius:16px;background:linear-gradient(135deg,rgba(111,227,193,0.07) 0%,rgba(63,191,166,0.04) 100%);position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(63,191,166,0.1);">
+          <div
+            style="position:absolute;top:-12px;left:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:72px;line-height:1;color:rgba(63,191,166,0.15);pointer-events:none;">
+            "</div>
+          <p class="font-display"
+            style="font-weight:700;font-size:18px;line-height:1.65;color:var(--text);position:relative;z-index:1;"
+            data-i18n="testimonial.3.quote">
+          </p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:14px;position:relative;z-index:1;">
+            <div
+              style="width:38px;height:38px;background:var(--surface-2);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5"
+                stroke-linecap="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="testimonial.3.role"></div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px;" data-i18n="testimonial.3.company"></div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="padding:36px;border:1px solid var(--border-teal);border-radius:16px;background:linear-gradient(135deg,rgba(111,227,193,0.07) 0%,rgba(63,191,166,0.04) 100%);position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(63,191,166,0.1);">
+          <div
+            style="position:absolute;top:-12px;left:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:72px;line-height:1;color:rgba(63,191,166,0.15);pointer-events:none;">
+            "</div>
+          <p class="font-display"
+            style="font-weight:700;font-size:18px;line-height:1.65;color:var(--text);position:relative;z-index:1;"
+            data-i18n="testimonial.4.quote">
+          </p>
+          <div style="margin-top:24px;display:flex;align-items:center;gap:14px;position:relative;z-index:1;">
+            <div
+              style="width:38px;height:38px;background:var(--surface-2);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5"
+                stroke-linecap="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="testimonial.4.role"></div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px;" data-i18n="testimonial.4.company"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CTA ═══════════════════════ -->
+  <section id="contact" class="section" style="padding:120px 40px;position:relative;overflow:hidden;">
+
+    <!-- Radial glow behind CTA -->
+    <div
+      style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(111,227,193,0.14) 0%,transparent 65%);pointer-events:none;z-index:0;">
+    </div>
+
+    <div class="container" style="position:relative;z-index:1;">
+      <div class="reveal" style="max-width:680px;margin:0 auto;text-align:center;">
+
+        <div
+          style="font-family:'Onest',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:24px;"
+          data-i18n="cta.label">
+          Get Started</div>
+
+        <h2 class="font-display"
+          style="font-weight:800;font-size:clamp(36px,5vw,64px);letter-spacing:-0.035em;line-height:1.1;margin-bottom:24px;color:var(--text);">
+          <span data-i18n="cta.heading">Stop losing hours. Start compounding.</span>
+        </h2>
+
+        <p style="font-size:16px;line-height:1.75;color:var(--text-2);margin-bottom:48px;" data-i18n="cta.desc">
+          Book a 30-minute strategy call. We'll map your pipeline, find the hours being lost, and show you exactly what
+          we'd automate — before you commit to anything.
+        </p>
+
+        <form id="leadForm" style="max-width:760px;margin:0 auto 14px;">
+          <div class="lead-form-grid">
+            <div class="input-wrap">
+              <input type="text" name="companyName" placeholder="Company name" class="email-input"
+                autocomplete="organization">
+            </div>
+            <div class="input-wrap">
+              <input type="tel" name="phoneNumber" placeholder="Phone number *" class="email-input" required
+                autocomplete="tel">
+            </div>
+            <div class="input-wrap">
+              <input type="email" name="email" placeholder="Work email" class="email-input" autocomplete="email">
+            </div>
+          </div>
+          <div class="cta-form"
+            style="display:flex;max-width:420px;margin:0 auto;border:1px solid var(--border-teal);border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(63,191,166,0.12);background:var(--surface);">
+            <button type="submit" class="btn-primary"
+              style="border-radius:0;white-space:nowrap;flex-shrink:0;width:100%;justify-content:center;">Book a Call
+              →</button>
+          </div>
+          <p id="formStatus" class="status-text" style="margin-top:12px;"></p>
+        </form>
+
+        <p style="font-size:12px;color:var(--text-2);" data-i18n="form.disclaimer">No commitment. 30 minutes. You'll
+          leave with an ROI estimate and
+          a clear automation map.</p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="section" style="border-top:1px solid var(--border);padding:52px 40px;">
+    <div class="container">
+
+      <div
+        style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px;margin-bottom:40px;">
+
+        <div>
+          <img src="assets/logos/logo_transparent.png" alt="MynAI"
+            style="height:120px;width:auto;margin-bottom:14px;display:block;">
+          <p style="font-size:13px;color:var(--text-2);line-height:1.6;max-width:240px;" data-i18n="footer.tagline">
+            Automate the work.<br>Scale the
+            results.</p>
+        </div>
+
+        <div style="display:flex;gap:56px;flex-wrap:wrap;">
+          <div>
+            <div
+              style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-2);margin-bottom:16px;">
+              Navigation</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="#services"
+                style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.18s;"
+                onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">Services</a>
+              <a href="#process" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.18s;"
+                onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">Process</a>
+              <a href="#results" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.18s;"
+                onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">Results</a>
+            </div>
+          </div>
+          <div>
+            <div
+              style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-2);margin-bottom:16px;">
+              Contact</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="mailto:hello@mynai.dev"
+                style="font-size:13px;color:var(--teal-dark);text-decoration:none;transition:opacity 0.18s;"
+                onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">hello@mynai.dev</a>
+              <a href="#contact" class="btn-primary" style="font-size:12px;padding:9px 16px;margin-top:4px;">Book a Call
+                →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sep"></div>
+      <div
+        style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:24px;">
+        <p style="font-size:12px;color:var(--text-2);">© 2025 MynAI. All rights reserved.</p>
+        <p style="font-size:12px;color:var(--text-2);">mynai.co</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    // ── Language and Translations
+    const translations = {
+      en: {
+        'nav.bookCall': 'Book a Call',
+        'hero.label': 'AI Automation Agency · Sales & Consulting',
+        'hero.heading1': 'Automate the work.',
+        'hero.heading2': 'Scale the results.',
+        'hero.subheading': 'We build AI systems for sales and consulting teams — wire them into your existing stack and hand them over running. No fluff, no roadmaps. Just systems that work.',
+        'hero.cta1': 'Book a Strategy Call',
+        'hero.cta2': 'See what we automate',
+        'hero.metric1.val': '12 hrs',
+        'hero.metric1.label': 'saved per rep / week',
+        'hero.metric2.val': '4 hrs',
+        'hero.metric2.label': 'proposal turnaround / was 3 days',
+        'hero.metric3.val': '40+',
+        'hero.metric3.label': 'systems wired & running',
+        'hero.metric4.val': '3×',
+        'hero.metric4.label': 'pipeline output, same team',
+        'services.label': 'What We Build',
+        'services.heading': 'AI wired into how your team already works.',
+        'services.desc': 'We don\'t sell tools. We build operating systems for your revenue team — connected to the CRM, inbox, and documents your people use every day.',
+        'services.1.title': 'Sales Pipeline Automation',
+        'services.1.desc': 'Automate lead qualification, follow-up sequences, and CRM updates. Your reps focus on closing — not admin. We\'ve eliminated 40+ manual follow-ups per rep per day.',
+        'services.2.title': 'AI Proposal Generation',
+        'services.2.desc': 'Custom proposals in 4 hours, not 3 days. Pull client data, apply your templates, deliver on-brand outputs automatically. Every time, without exception.',
+        'services.3.title': 'Stack Integration',
+        'services.3.desc': 'Connect your CRM, inbox, Slack, and reporting into one automated system. No rip-and-replace — we wire into what you already use. Zero platform switching.',
+        'services.4.title': 'Consulting Ops Automation',
+        'services.4.desc': 'Automate client onboarding, status reporting, and delivery workflows. Deliver more engagements without adding headcount. Same team, 3× the throughput.',
+        'process.label': 'How It Works',
+        'process.heading': 'Manual to measurable. In three steps.',
+        'process.1.title': 'Audit & Map',
+        'process.1.desc': 'We map your full pipeline and find every manual bottleneck. You get a clear ROI case with exact time savings before we write a single line of code.',
+        'process.1.meta': 'Delivered within 48 hours',
+        'process.2.title': 'Build & Wire',
+        'process.2.desc': 'We build every automation inside your existing tools. No migration. No new platforms to learn. Your team keeps working exactly how they do — minus the manual parts.',
+        'process.2.meta': '2–3 week build sprint',
+        'process.3.title': 'Hand Over Running',
+        'process.3.desc': 'Full ownership — trained, documented, live. You\'re not dependent on us to keep it running. We stay on for 30 days to measure results and tune performance.',
+        'process.3.meta': '30-day performance window',
+        'results.label': 'Results',
+        'results.heading': 'Numbers, not promises.',
+        'results.desc': 'Our clients are ROI-driven. We measure every engagement. These aren\'t projections — they\'re averages from active deployments.',
+        'results.1.metric': '3d → 4h',
+        'results.1.title': 'Proposal Turnaround',
+        'results.1.desc': 'Cut from 3 days to 4 hours. Same quality, same brand standards. Every time — not just occasionally.',
+        'results.1.footer': '87% time reduction',
+        'results.2.metric': '12 hrs',
+        'results.2.title': 'Saved Per Rep / Week',
+        'results.2.desc': 'Back in the pipeline, not in spreadsheets. Same headcount closing more deals — no new hires required.',
+        'results.2.footer': '30% of a working week',
+        'results.3.metric': '3×',
+        'results.3.title': 'Pipeline Output',
+        'results.3.desc': 'Three times the leads processed without adding a single hire. Scale without burn — compounding results over time.',
+        'results.3.footer': 'Same headcount',
+        'testimonial.1.quote': 'I liked the bot\'s communication style: short and to the point. It\'s hard to tell an AI is writing. The bot immediately asks for needed details and doesn\'t overload the customer. Conversion to order has grown.',
+        'testimonial.1.role': 'Marketing Director',
+        'testimonial.1.company': 'Premium retail · Kazakhstan',
+        'testimonial.2.quote': 'MynAI implemented our AI bot in less than two weeks. All initial inquiries are handled automatically, admins are freed from repetitive responses. Leads have become higher quality.',
+        'testimonial.2.role': 'Operations Manager',
+        'testimonial.2.company': 'Training center · 20+ employees',
+        'testimonial.3.quote': 'After implementation, the bot itself clarifies date, time, format, and group size. The manager receives a ready request and works only with warm clients. Conversion has noticeably increased.',
+        'testimonial.3.role': 'Head of Sales',
+        'testimonial.3.company': 'Sports complex',
+        'testimonial.4.quote': 'MynAI implemented an AI assistant for initial client qualification. Now every request is structured: objective, project stage, financing type — the expert receives a prepared client.',
+        'testimonial.4.role': 'Director',
+        'testimonial.4.company': 'Consulting company',
+        'cta.label': 'Get Started',
+        'cta.heading': 'Stop losing hours. Start compounding.',
+        'cta.desc': 'Book a 30-minute strategy call. We\'ll map your pipeline, find the hours being lost, and show you exactly what we\'d automate — before you commit to anything.',
+        'form.company': 'Company name',
+        'form.phone': 'Phone number *',
+        'form.email': 'Work email',
+        'form.submit': 'Book a Call →',
+        'form.disclaimer': 'No commitment. 30 minutes. You\'ll leave with an ROI estimate and a clear automation map.',
+        'auth.form.sending': 'Sending...',
+        'auth.form.phoneRequired': 'Phone number is required.',
+        'auth.form.success': 'Thanks. We received your details and will reach out shortly.',
+        'auth.form.error': 'Submission failed. Please try again.',
+        'footer.tagline': 'Automate the work. Scale the results.',
+        'footer.nav': 'Navigation',
+        'footer.contact': 'Contact',
+        'footer.copyright': '© 2025 MynAI. All rights reserved.',
+        'footer.domain': 'mynai.co',
+      },
+      ru: {
+        'nav.bookCall': 'Забронировать звонок',
+        'hero.label': 'Агентство AI-автоматизации · Продажи и консалтинг',
+        'hero.heading1': 'Автоматизируйте работу -',
+        'hero.heading2': 'Масштабируйте результаты',
+        'hero.subheading': 'Мы создаем AI-системы для команд продаж и консалтинга — интегрируем их в ваш существующий стек и передаем в рабочем состоянии. Никакой воды, никаких дорожных карт. Просто системы, которые работают.',
+        'hero.cta1': 'Забронировать звонок',
+        'hero.cta2': 'Смотреть, что мы автоматизируем',
+        'hero.metric1.val': '12 часов',
+        'hero.metric1.label': 'сэкономлено на сотрудника в неделю',
+        'hero.metric2.val': '4 часа',
+        'hero.metric2.label': 'подготовка предложения / было 3 дня',
+        'hero.metric3.val': '40+',
+        'hero.metric3.label': 'систем интегрировано и работает',
+        'hero.metric4.val': '3×',
+        'hero.metric4.label': 'производительность конвейера, та же команда',
+        'services.label': 'Что мы создаем',
+        'services.heading': 'AI интегрирована в рабочие процессы вашей команды.',
+        'services.desc': 'Мы не продаем инструменты. Мы создаем операционные системы для команды продаж — связанные с CRM, почтой и документами, которые использует ваша команда.',
+        'services.1.title': 'Автоматизация конвейера продаж',
+        'services.1.desc': 'Автоматизируйте квалификацию лидов, последовательность контактов и обновления CRM. Ваши менеджеры сосредоточены на закрытии сделок, а не на администрировании. Мы устранили 40+ ручных контактов в день на менеджера.',
+        'services.2.title': 'AI-генерация предложений',
+        'services.2.desc': 'Пользовательские предложения за 4 часа вместо 3 дней. Извлекайте данные клиента, применяйте ваши шаблоны, автоматически создавайте брендированные выходные данные. Каждый раз, без исключений.',
+        'services.3.title': 'Интеграция стека',
+        'services.3.desc': 'Подключите CRM, почту, Slack и отчетность в одну автоматизированную систему. Без замены на новую платформу — интегрируем в уже используемые инструменты. Ноль переходов на новые платформы.',
+        'services.4.title': 'Автоматизация консалтинг-операций',
+        'services.4.desc': 'Автоматизируйте подключение клиентов, отчетность о статусе и рабочие процессы доставки. Выполняйте больше контрактов без найма. Та же команда, в 3 раза больше производительности.',
+        'process.label': 'Как это работает',
+        'process.heading': 'От ручных процессов к измеримому результату. За три этапа.',
+        'process.1.title': 'Аудит и картирование',
+        'process.1.desc': 'Мы отображаем весь ваш конвейер и находим каждое узкое место. Вы получаете четкий расчет ROI с точной экономией времени, прежде чем мы напишем одну строку кода.',
+        'process.1.meta': 'Доставлено в течение 48 часов',
+        'process.2.title': 'Построение и интеграция',
+        'process.2.desc': 'Мы строим каждую автоматизацию внутри ваших существующих инструментов. Никакой миграции. Никаких новых платформ. Ваша команда продолжает работать так же, как раньше, без ручных операций.',
+        'process.2.meta': 'Спринт разработки 2–3 недели',
+        'process.3.title': 'Передача в рабочем состоянии',
+        'process.3.desc': 'Полное владение — обучено, задокументировано, в производстве. Вы не зависите от нас для его поддержания. Мы остаемся на 30 дней, чтобы измерить результаты и оптимизировать производительность.',
+        'process.3.meta': 'Окно измерения производительности 30 дней',
+        'results.label': 'Результаты',
+        'results.heading': 'Числа, не обещания.',
+        'results.desc': 'Наши клиенты сосредоточены на ROI. Мы измеряем каждое взаимодействие. Это не прогнозы — это средние значения из активных развертываний.',
+        'results.1.metric': '3 дня → 4 часа',
+        'results.1.title': 'Подготовка предложения',
+        'results.1.desc': 'Сокращено с 3 дней до 4 часов. Такое же качество, те же стандарты бренда. Каждый раз, без исключений.',
+        'results.1.footer': 'Снижение на 87%',
+        'results.2.metric': '12 часов',
+        'results.2.title': 'Сэкономлено на менеджера в неделю',
+        'results.2.desc': 'Назад в конвейер, не в таблицы. Та же команда закрывает больше сделок — никаких новых нанятых.',
+        'results.2.footer': '30% рабочей неделю',
+        'results.3.metric': '3×',
+        'results.3.title': 'Производительность конвейера',
+        'results.3.desc': 'В три раза больше обработанных лидов без единого новичка. Масштабируйтесь без затрат — результаты нарастают со временем.',
+        'results.3.footer': 'Та же команда',
+        'testimonial.1.quote': 'Понравился стиль общения бота, короткий и по делу. Сложно определить что пишет ИИ. Бот сразу запрашивает нужные параметры и не перегружает клиента. Конверсия в заказ выросла.',
+        'testimonial.1.role': 'Маркетинг-директор',
+        'testimonial.1.company': 'Премиум-ритейл · Казахстан',
+        'testimonial.2.quote': 'MynAI внедрили нам AI-бота меньше чем за 2 недели. Все первичные обращения обрабатываются автоматически, администраторы разгружены от однотипных ответов клиентам. Заявки стали более качественными.',
+        'testimonial.2.role': 'Операционный менеджер',
+        'testimonial.2.company': 'Учебный центр · 20+ сотрудников',
+        'testimonial.3.quote': 'После внедрения бот сам уточняет дату, время, формат и количество людей. Менеджер получает уже готовую заявку и работает только с «тёплыми» клиентами. Конверсия заметно выросла.',
+        'testimonial.3.role': 'Руководитель отдела продаж',
+        'testimonial.3.company': 'Спортивный комплекс',
+        'testimonial.4.quote': 'MynAI внедрили нам AI-ассистента для первичной квалификации клиентов. Теперь каждый запрос структурирован: цель, стадия проекта, тип финансирования — эксперт получает уже подготовленного клиента.',
+        'testimonial.4.role': 'Руководитель',
+        'testimonial.4.company': 'Консалтинговая компания',
+        'cta.label': 'Начать',
+        'cta.heading': 'Хватит терять часы. Начните умножать результаты.',
+        'cta.desc': 'Забронируйте 30-минутный стратегический звонок. Мы отобразим ваш конвейер, найдем потерянные часы и покажем, что именно мы бы автоматизировали, прежде чем вы на что-либо согласитесь.',
+        'form.company': 'Название компании',
+        'form.phone': 'Номер телефона *',
+        'form.email': 'email',
+        'form.submit': 'Забронировать звонок →',
+        'form.disclaimer': 'Без обязательств. 30 минут. Вы уйдете с расчетом ROI и четкой картой автоматизации.',
+        'auth.form.sending': 'Отправка...',
+        'auth.form.phoneRequired': 'Номер телефона обязателен.',
+        'auth.form.success': 'Спасибо. Мы получили ваши данные и вскоре свяжемся с вами.',
+        'auth.form.error': 'Ошибка отправления. Пожалуйста, повторите попытку.',
+        'footer.tagline': 'Автоматизируйте работу. Масштабируйте результаты.',
+        'footer.nav': 'Навигация',
+        'footer.contact': 'Контакт',
+        'footer.copyright': '© 2025 MynAI. Все права защищены.',
+        'footer.domain': 'mynai.co',
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang;
+      document.getElementById('langToggle').textContent = lang === 'en' ? 'RU' : 'EN';
+
+      // Update all translated elements
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+
+      // Update form placeholders
+      const companyInput = document.querySelector('input[name="companyName"]');
+      const phoneInput = document.querySelector('input[name="phoneNumber"]');
+      const emailInput = document.querySelector('input[name="email"]');
+
+      if (companyInput) companyInput.placeholder = translations[lang]['form.company'];
+      if (phoneInput) phoneInput.placeholder = translations[lang]['form.phone'];
+      if (emailInput) emailInput.placeholder = translations[lang]['form.email'];
+
+      // Update button texts
+      const submitBtn = document.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.textContent = translations[lang]['form.submit'];
+    }
+
+    // Set initial language
+    setLanguage(currentLang);
+
+    // Language toggle button
+    document.getElementById('langToggle').addEventListener('click', () => {
+      setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    });
+
+    // ── Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(el => io.observe(el));
+
+    // ── Smooth scroll + close mobile nav
+    const navMobile = document.getElementById('navMobile');
+    const navToggle = document.getElementById('navToggle');
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        const target = document.querySelector(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          navMobile.classList.remove('open');
+          navToggle.classList.remove('open');
+        }
+      });
+    });
+
+    // ── Mobile nav toggle
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('open');
+      navMobile.classList.toggle('open');
+    });
+
+    // ── Active nav link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const activateLink = () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 120) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    };
+    window.addEventListener('scroll', activateLink, { passive: true });
+    activateLink();
+
+    // ── Input focus rings
+    document.querySelectorAll('.email-input').forEach((inputEl) => {
+      const wrap = inputEl.parentElement;
+      if (!wrap) return;
+      inputEl.addEventListener('focus', () => { wrap.style.borderColor = 'rgba(63,191,166,0.7)'; });
+      inputEl.addEventListener('blur', () => { wrap.style.borderColor = 'rgba(63,191,166,0.3)'; });
+    });
+
+    // ── Lead form submit (Formspree)
+    const leadForm = document.getElementById('leadForm');
+    const formStatus = document.getElementById('formStatus');
+    if (leadForm) {
+      leadForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(leadForm);
+        const payload = {
+          companyName: String(formData.get('companyName') || '').trim(),
+          phoneNumber: String(formData.get('phoneNumber') || '').trim(),
+          email: String(formData.get('email') || '').trim(),
+        };
+
+        if (!payload.phoneNumber) {
+          if (formStatus) {
+            formStatus.textContent = translations[currentLang]['auth.form.phoneRequired'];
+            formStatus.className = 'status-text error';
+          }
+          return;
+        }
+
+        const submitButton = leadForm.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+        if (formStatus) {
+          formStatus.textContent = translations[currentLang]['auth.form.sending'];
+          formStatus.className = 'status-text';
+        }
+
+        try {
+          const response = await fetch('https://formspree.io/f/xwvwaanz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error(translations[currentLang]['auth.form.error']);
+          }
+
+          // Show success toast
+          showSuccessToast(translations[currentLang]['auth.form.success']);
+          leadForm.reset();
+          if (formStatus) {
+            formStatus.textContent = '';
+            formStatus.className = 'status-text';
+          }
+        } catch (error) {
+          if (formStatus) {
+            formStatus.textContent = error instanceof Error ? error.message : translations[currentLang]['auth.form.error'];
+            formStatus.className = 'status-text error';
+          }
+        } finally {
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    }
+
+    // ── Success toast notification function
+    function showSuccessToast(message) {
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'success-overlay';
+      document.body.appendChild(overlay);
+
+      // Create toast
+      const toast = document.createElement('div');
+      toast.className = 'success-toast';
+      const subtextMessage = currentLang === 'ru' ? 'Мы скоро с вами свяжемся' : 'We\'ll reach out shortly';
+      toast.innerHTML = `
+        <div class="success-toast-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="success-toast-text">${message}</div>
+        <div class="success-toast-subtext">${subtextMessage}</div>
+      `;
+      document.body.appendChild(toast);
+
+      // Auto-close after 4 seconds
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        overlay.classList.add('hidden');
+        setTimeout(() => {
+          toast.remove();
+          overlay.remove();
+        }, 350);
+      }, 4000);
+
+      // Close on click
+      overlay.addEventListener('click', () => {
+        toast.classList.add('hidden');
+        overlay.classList.add('hidden');
+        setTimeout(() => {
+          toast.remove();
+          overlay.remove();
+        }, 350);
+      });
+    }
+  </script>
+
+</body>
+
+</html>

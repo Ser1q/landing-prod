@@ -24,8 +24,11 @@ const out = join(dir, filename);
 
 const browser = await puppeteer.launch({ headless: true });
 const page = await browser.newPage();
-await page.setViewport({ width: 1440, height: 900 });
+// Default to mobile unless specified otherwise
+const isMobile = !label || label === 'mobile-before' || label === 'mobile-after' || label.includes('mobile');
+const viewport = isMobile ? { width: 375, height: 667 } : { width: 1440, height: 900 };
+await page.setViewport(viewport);
 await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
-await page.screenshot({ path: out, fullPage: false });
+await page.screenshot({ path: out, fullPage: true });
 await browser.close();
 console.log(`Screenshot saved: ${out}`);

@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Generated screenshots
+temporary screenshots/
+
+# macOS system files
+.DS_Store
+
+# Brand guideline PDFs (not needed for website)
+assets/*.pdf

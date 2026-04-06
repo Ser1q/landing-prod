@@ -840,6 +840,8 @@
         border-radius: 0 0 4px 4px !important;
         width: 100% !important;
         justify-content: center !important;
+        min-height: 48px !important;
+        padding: 16px 24px !important;
       }
 
       .container {
@@ -848,6 +850,47 @@
 
       .lead-form-grid {
         grid-template-columns: 1fr !important;
+      }
+
+      /* Success toast mobile adjustments */
+      .success-toast {
+        width: calc(100vw - 48px) !important;
+        max-width: calc(100vw - 48px) !important;
+        padding: 32px 20px !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+      }
+
+      .success-toast-icon {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: 16px !important;
+      }
+
+      .success-toast-text {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+      }
+
+      .success-toast-subtext {
+        font-size: 13px !important;
+      }
+
+      /* Form status text mobile */
+      .status-text {
+        font-size: 14px !important;
+        min-height: 24px !important;
+        margin-top: 16px !important;
+        padding: 8px 12px !important;
+        background: rgba(63, 191, 166, 0.05) !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+      }
+
+      .status-text.error {
+        background: rgba(185, 71, 71, 0.1) !important;
       }
     }
   </style>
@@ -1401,7 +1444,7 @@
           we'd automate — before you commit to anything.
         </p>
 
-        <form id="leadForm" style="max-width:760px;margin:0 auto 14px;">
+        <form id="leadForm" novalidate style="max-width:760px;margin:0 auto 14px;">
           <div class="lead-form-grid">
             <div class="input-wrap">
               <input type="text" name="companyName" placeholder="Company name" class="email-input"
@@ -1659,7 +1702,7 @@
       }
     };
 
-    let currentLang = localStorage.getItem('lang') || 'en';
+    let currentLang = localStorage.getItem('lang') || 'ru';
 
     function setLanguage(lang) {
       currentLang = lang;
